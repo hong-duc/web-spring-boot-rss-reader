@@ -10,67 +10,105 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import static java.util.stream.Collectors.toList;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * quản lý RSS
  *
  * @author duc
  */
-@Controller
+@RestController
 @RequestMapping("/rss-app")
 public class RssController {
 
-    private List<RSS> userRSS = null;
-    private String user = "myuser";
+    private final org.slf4j.Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    @RequestMapping(value = "/{user}")
-    public String index(@PathVariable String user, Model model) {
-        if (this.user.equalsIgnoreCase(user) && !"".equals(user)) {
-            if (userRSS == null) {
-                userRSS = getUserRSS(user);
-            }
-            model.addAttribute("userRSS", userRSS);
-            return "app/index";
-        }else{
-            return "redirect: /";
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/{user}", method = RequestMethod.GET)
+    public List<RSS> getRss(@PathVariable(value = "user") String user) {
+        List<RSS> rss = this.getUserRSS(user);
+        if (rss == null) {
+            throw new UserNotExists();
+        } else {
+            return rss;
         }
     }
 
-    @RequestMapping(value = "/them-link", method = RequestMethod.POST)
-    public String themLink(@RequestParam String inputLink) {
-        RSS rss = generateRSS(inputLink);
-        userRSS.add(rss);
-        RSS.serializeRSS(userRSS, this.user);
-        return "redirect:/rss-app/" + this.user;
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    public String themRSS(@RequestBody(required = true) String link) {
+//        RSS rss = generateRss(inputLink);
+//        if (rss == null) {
+//            throw new InvalidLink();
+//        }
+//        List<RSS> userRss = this.getUserRSS(user);
+//        userRss.add(rss);
+//        RSS.serializeRSS(userRss, user);
+//        return rss;
+
+        LOG.info("themRSS: link=" + link);
+	return "da nhan";
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "", method = RequestMethod.PUT)
+    public String updateRSS(@RequestBody String link) {
+//        rss.getArticles().addAll(0, this.generateArticles(rss.getLink()));
+//        return rss;
+        LOG.info("updateRSS: link=" + link);
+	return "da nhan";
+    }
+
+    private List<Article> generateArticles(String url) {
+        SyndFeed feed = this.createFeed(url);
+
+        return feed.getEntries().stream()
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink()))
+                .collect(toList());
     }
 
     private List<RSS> getUserRSS(String user) {
-        List<RSS> rss = RSS.deserializeRSS(user);
-        return rss;
+        if (this.isUserExists(user)) {
+            LOG.info("getUserRSS: user co ton tai");
+            return RSS.deserializeRSS(user);
+        } else {
+            LOG.error("getUserRSS: user khong ton tai");
+            return null;
+        }
     }
 
-    private RSS generateRSS(String url) {
+    private RSS generateRss(String url) {
+
+        SyndFeed feed = createFeed(url);
+
+        RSS rss = new RSS(feed.getTitle(), url);
+        List<Article> articles = rss.getArticles();
+
+        feed.getEntries().stream()
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink()))
+                .forEach((article) -> articles.add(article));
+
+        return rss;
+
+    }
+
+    private SyndFeed createFeed(String url) {
         try {
-            URL feedUrl = new URL(url);
-            SyndFeedInput input = new SyndFeedInput();
-            SyndFeed feed = input.build(new XmlReader(feedUrl));
-
-            RSS rss = new RSS(feed.getTitle(), url);
-            List<Article> articles = rss.getArticles();
-
-            feed.getEntries().stream()
-                    .map((entry) -> new Article(entry.getTitle(), entry.getLink()))
-                    .forEach((article) -> articles.add(article));
-
-            return rss;
-
-        } catch (IOException | IllegalArgumentException | FeedException e) {
+            SyndFeedInput feedInput = new SyndFeedInput();
+            SyndFeed feed = feedInput.build(new XmlReader(new URL(url)));
+            return feed;
+        } catch (IllegalArgumentException | FeedException | IOException ex) {
+            LOG.error("an error in createFeed:", ex);
             return null;
         }
     }
@@ -78,5 +116,13 @@ public class RssController {
     private boolean isUserExists(String user) {
         File file = new File("users/" + user);
         return file.exists();
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "user khong ton tai")
+    protected class UserNotExists extends RuntimeException {
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "invalid link")
+    protected class InvalidLink extends RuntimeException {
     }
 }

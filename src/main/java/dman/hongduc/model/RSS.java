@@ -101,7 +101,7 @@ public class RSS implements Serializable {
                 return new ArrayList<>();
             }
         }catch(IOException | ClassNotFoundException ex){
-            //Logger.getLogger(RSS.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RSS.class.getName()).log(Level.SEVERE, null, ex);
             return new ArrayList<>();
         }
     }
