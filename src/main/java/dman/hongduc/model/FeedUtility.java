@@ -1,5 +1,6 @@
 package dman.hongduc.model;
 
+import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
@@ -44,7 +45,7 @@ public class FeedUtility {
         SyndFeed feed = createFeed(url);
 
         return feed.getEntries().stream()
-                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), toLocalDate(entry.getPublishedDate())))
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry)))
                 .collect(toList());
     }
 
@@ -77,7 +78,7 @@ public class FeedUtility {
         SortedSet<Article> articles = rss.getArticles();
 
         feed.getEntries().stream()
-                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), toLocalDate(entry.getPublishedDate())))
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry)))
                 .forEach((article) -> articles.add(article));
         return rss;
     }
@@ -154,5 +155,9 @@ public class FeedUtility {
 
     public static LocalDate toLocalDate(Date date) {
         return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+    
+    public static LocalDate getEntryDate(SyndEntry entry){
+        return entry.getPublishedDate() == null ? toLocalDate(entry.getUpdatedDate()) : toLocalDate(entry.getPublishedDate());
     }
 }
