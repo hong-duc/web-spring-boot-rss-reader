@@ -1,8 +1,9 @@
 package dman.hongduc.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dman.hongduc.model.RSS;
-import dman.hongduc.model.RssUtility;
+import com.rometools.rome.io.FeedException;
+import dman.hongduc.model.Feed;
+import dman.hongduc.model.FeedUtility;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONObject;
@@ -28,48 +29,83 @@ public class RssController {
 
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{user}", method = RequestMethod.GET)
-    public List<RSS> getRss(@PathVariable(value = "user") String user) {
-        List<RSS> rss = RssUtility.getUserRSS(user);
-        if (rss == null) {
+    public List<Feed> getRss(@PathVariable(value = "user") String user) {
+        List<Feed> feeds = FeedUtility.getUserFeeds(user);
+        if (feeds == null) {
             throw new UserNotExists();
         } else {
-            return rss;
+            return feeds;
         }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public RSS themRSS(@RequestBody(required = true) String resource) {
-        JSONObject obj = new JSONObject(resource);
-        String link = obj.getString("link");
-        String user = obj.getString("user");
-        RSS rss = RssUtility.generateRss(link);
-        if (rss == null) {
-            throw new InvalidLink();
+    public Feed themFeed(@RequestBody(required = true) String resource) {
+        try {
+            JSONObject obj = new JSONObject(resource);
+            String link = obj.getString("link");
+            String user = obj.getString("user");
+            Feed feed = FeedUtility.generateFeed(link);
+            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+            userFeeds.add(feed);
+            FeedUtility.saveFeeds(userFeeds, user);
+            return feed;
+        } catch (IllegalArgumentException | IOException ex) {
+            LOG.error("themFeed: ", ex);
+            throw new NotGoodUrl();
+        } catch (FeedException ex) {
+            LOG.error("themFeed: ", ex);
+            throw new InvalidUrl();
         }
-        List<RSS> userRss = RssUtility.getUserRSS(user);
-        userRss.add(rss);
-        RssUtility.serializeRSS(userRss, user);
-        return rss;
-
-//        LOG.info("themRSS: link=" + link);
-//	return "da nhan";
     }
 
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "", method = RequestMethod.PUT)
-    public RSS updateRSS(@RequestBody String resource) {
+    public void updateFeed(@RequestBody String resource) {
         try {
+	    JSONObject jsObj = new JSONObject(resource);
+	    Object jsFeed = jsObj.get("feed");
+	    String user = jsObj.getString("user");
+	     
             ObjectMapper mapper = new ObjectMapper();
-            RSS rss = mapper.readValue(resource, RSS.class);
+            Feed feed = mapper.readValue(jsFeed.toString(), Feed.class);
+            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+            for(Feed f : userFeeds){
+                if(f.equals(feed)){
+                    feed = f;
+		    LOG.info("updateFeed: equal");
+                    break;
+                }
+            }
+            
+            feed.getArticles().addAll(FeedUtility.generateArticles(feed.getLink()));
+	    FeedUtility.saveFeeds(userFeeds, user);
+        } catch (IOException | IllegalArgumentException ex) {
+            LOG.error("updateFeed: ", ex);
+            throw new NotGoodUrl();
+        } catch (FeedException ex) {
+            LOG.error("updateFeed: ", ex);
+            throw new InvalidUrl();
+        }
+    }
 
-            rss.getArticles().addAll(0, RssUtility.generateArticles(rss.getLink()));
-            return rss;
-//        LOG.info("updateRSS: link=" + resource);
-//        return "da nhan";
+    @RequestMapping(value = "", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    public boolean deleteFeed(@RequestBody String resource) {
+        try {
+            JSONObject jsObj = new JSONObject(resource);
+            Object jsFeed = jsObj.getString("feed");
+            String user = jsObj.getString("user");
+
+            ObjectMapper mapper = new ObjectMapper();
+            Feed feed = mapper.readValue(jsFeed.toString(), Feed.class);
+
+            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+            return userFeeds.remove(feed);
+
         } catch (IOException ex) {
-            LOG.error("error in updateRSS:", ex);
-            throw new serverError();
+            LOG.error("deleteFeed: ", ex);
+            return false;
         }
     }
 
@@ -77,8 +113,12 @@ public class RssController {
     protected class UserNotExists extends RuntimeException {
     }
 
-    @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "invalid link")
-    protected class InvalidLink extends RuntimeException {
+    @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "không thể lấy rss từ url này hoặc không hỗ trợ")
+    protected class InvalidUrl extends RuntimeException {
+    }
+
+    @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "có thể không phải là url")
+    protected class NotGoodUrl extends RuntimeException {
     }
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "có lỗi ở bên server")
