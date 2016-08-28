@@ -1,5 +1,7 @@
 package dman.hongduc;
 
+import java.io.File;
+import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,7 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class Application {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        File file = new File("users/myuser");
+        file.createNewFile();
         SpringApplication.run(Application.class, args);
     }
 }
