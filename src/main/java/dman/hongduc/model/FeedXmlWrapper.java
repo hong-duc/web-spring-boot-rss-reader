@@ -6,6 +6,7 @@
 package dman.hongduc.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -26,13 +27,17 @@ public class FeedXmlWrapper extends XmlAdapter<String, LocalDate>{
     public FeedXmlWrapper(List<Feed> feeds) {
         this.feeds = feeds;
     }
+    
+    public FeedXmlWrapper(FeedXmlWrapper obj){
+        this.feeds = new ArrayList<>(obj.getFeeds());
+    }
 
     /**
      * @return the feeds
      */
     @XmlElement(name = "Feed")
     public List<Feed> getFeeds() {
-        return feeds;
+        return this.feeds;
     }
 
     /**

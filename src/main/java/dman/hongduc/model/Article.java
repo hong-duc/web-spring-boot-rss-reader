@@ -20,17 +20,21 @@ public class Article implements Serializable, Comparable<Article> {
     @JsonDeserialize(using = CustomDateDeserializer.class)
     @JsonSerialize(using = CustomDateSerializer.class)
     private Optional<LocalDate> publishDate;
+    private boolean isRead;
+   
 
     public Article() {
         this.title = "";
         this.link = "";
         this.publishDate = Optional.empty();
+        this.isRead = false;
     }
 
-    public Article(String title, String link, LocalDate publishDate) {
+    public Article(String title, String link, LocalDate publishDate, boolean isRead) {
         this.title = title;
         this.link = link;
         this.publishDate = Optional.of(publishDate);
+        this.isRead = isRead;
     }
 
     /**
@@ -61,11 +65,22 @@ public class Article implements Serializable, Comparable<Article> {
         this.link = link;
     }
 
+    public boolean getIsRead() {
+        return this.isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Article) {
-            Article article = (Article) obj;
-            return this.getLink().equalsIgnoreCase(article.getLink()) && this.getTitle().equalsIgnoreCase(article.getTitle()) && this.getPublishDate().equals(article.getPublishDate());
+        if(obj instanceof Article){
+            Article a = (Article) obj;
+            boolean eq1 = this.getTitle().equals(a.getTitle());
+            boolean eq2 = this.getLink().equals(a.getLink());
+            boolean eq3 = this.getPublishDate().equals(a.getPublishDate());
+            return eq1 && eq2 && eq3;
         }
         return false;
     }
@@ -81,11 +96,11 @@ public class Article implements Serializable, Comparable<Article> {
 
     @Override
     public int compareTo(Article o) {
-        if (o.getPublishDate().isAfter(this.getPublishDate())) {
-            return 1;
-        }
-        else{
-            return -1;
+        int number = this.getPublishDate().compareTo(o.getPublishDate());
+        if(number == 0){
+            return this.getTitle().compareTo(o.getTitle());
+        }else{
+            return number*-1;
         }
     }
 

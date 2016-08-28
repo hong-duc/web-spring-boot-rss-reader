@@ -3,7 +3,8 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 __export(require('./environment'));
-__export(require('./components/app-component/app.component'));
-__export(require('./components/rss-articles-component/rss-articles.component'));
-__export(require('./services/rss.service'));
+__export(require('./components/index'));
+__export(require('./services/index'));
+__export(require('./model/index'));
+__export(require('./shared/index'));
 //# sourceMappingURL=index.js.map

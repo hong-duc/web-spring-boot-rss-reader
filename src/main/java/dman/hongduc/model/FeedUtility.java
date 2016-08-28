@@ -34,7 +34,7 @@ public class FeedUtility {
     /**
      * tạo ra danh sách Article từ rss url
      *
-     * @param url url tới trang rss, thường phải có /rss hoặc .rss ở cuối
+     * @param url url tới trang rss
      * @return danh sách Article
      * @throws com.rometools.rome.io.FeedException khi url không dẫn tới nơi
      * chứa xml rss
@@ -45,7 +45,7 @@ public class FeedUtility {
         SyndFeed feed = createFeed(url);
 
         return feed.getEntries().stream()
-                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry)))
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry), false))
                 .collect(toList());
     }
 
@@ -78,7 +78,7 @@ public class FeedUtility {
         SortedSet<Article> articles = rss.getArticles();
 
         feed.getEntries().stream()
-                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry)))
+                .map((entry) -> new Article(entry.getTitle(), entry.getLink(), getEntryDate(entry), false))
                 .forEach((article) -> articles.add(article));
         return rss;
     }
@@ -139,7 +139,7 @@ public class FeedUtility {
      * @param user tên người dùng
      * @return danh sách Feed nếu có, nếu không có trả về danh sách rỗng
      */
-    public static List<Feed> loadFeeds(String user) {
+    private static List<Feed> loadFeeds(String user) {
         try {
             File file = new File("users/" + user + "/rss.xml");
 
@@ -156,8 +156,22 @@ public class FeedUtility {
     public static LocalDate toLocalDate(Date date) {
         return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
     }
-    
-    public static LocalDate getEntryDate(SyndEntry entry){
+
+    public static LocalDate getEntryDate(SyndEntry entry) {
         return entry.getPublishedDate() == null ? toLocalDate(entry.getUpdatedDate()) : toLocalDate(entry.getPublishedDate());
+    }
+
+    public static Feed findFeedByTitle(List<Feed> feeds, String feedTitle) {
+        LOG.info("findFeedByTitle: find with value = " + feedTitle);
+        return feeds.stream().filter(f -> f.getTitle().equalsIgnoreCase(feedTitle))
+                .limit(1)
+                .findFirst()
+                .get();
+    }
+
+    public static Article findArticleByTitle(Feed feed, String title) {
+        return feed.getArticles().stream().filter(a -> a.getTitle().equalsIgnoreCase(title))
+                .limit(1)
+                .findFirst().get();
     }
 }

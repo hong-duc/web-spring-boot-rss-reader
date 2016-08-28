@@ -6,7 +6,7 @@ var Feed = (function () {
         this.link = obj.link;
         this.articles = [];
         for (var i in obj.articles) {
-            this.articles.push(new Article_1.Article(obj.articles[i]));
+            this.articles.push(new Article_1.Article(obj.articles[i], this.title));
         }
     }
     return Feed;

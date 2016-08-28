@@ -28,7 +28,9 @@ var AppModule = (function () {
                 _1.RssArticlesComponent
             ],
             providers: [
-                _1.RssService
+                _1.RssService,
+                _1.ArticleService,
+                _1.HttpMethod
             ],
             bootstrap: [_1.AppComponent]
         }), 

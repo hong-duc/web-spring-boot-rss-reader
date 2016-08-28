@@ -42,15 +42,26 @@ var AppComponent = (function () {
         });
         console.log('submit link: ' + this.link);
     };
-    AppComponent.prototype.onDelete = function (rss) {
-        console.log('delete this: ' + rss.title);
+    AppComponent.prototype.onDelete = function (feed) {
+        var _this = this;
+        console.log('delete this: ' + feed.title);
+        this.rssService.deleteFeed(feed)
+            .then(function (feed) {
+            if (feed !== null) {
+                var i = _this.feeds.indexOf(feed);
+                _this.feeds.splice(i, 1);
+                alert('delete feed thanh cong');
+            }
+        });
     };
     AppComponent.prototype.onRefesh = function (feed) {
         var _this = this;
         console.log('refesh this: ' + feed.title);
         this.rssService.refeshFeed(feed).then(function (feed) {
             if (feed !== null) {
-                _this.getListOfRss();
+                var i = _this.feeds.findIndex(function (f) { return f.link == feed.link; });
+                _this.feeds[i] = feed;
+                alert('update feed thanh cong');
             }
         });
     };

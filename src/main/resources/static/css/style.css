@@ -466,3 +466,36 @@ ul {
 .table-nav tr td:hover {
     cursor: pointer;
 }
+
+td.small-cells {
+    width: 50px;
+}
+
+.article-container {
+    height: 460px;
+    overflow: auto;
+}
+
+a.feed-title {
+    color: white;
+}
+
+a.feed-title:hover {
+    color: white;
+}
+
+.feed-container {
+    height: 460px;
+    overflow: auto;
+}
+
+.large-cells {
+    width: 150px;
+}
+
+.user-name a{
+            color: white;
+        }
+        .user-name a:hover{
+            text-decoration: none;
+        }

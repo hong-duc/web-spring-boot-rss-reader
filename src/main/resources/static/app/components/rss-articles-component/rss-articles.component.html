@@ -1,16 +1,16 @@
 <div class="inbox-body" *ngIf="articles">
     <div class="mail-option">
         <div class="chk-all">
-            <input type="checkbox" class="mail-checkbox mail-group-checkbox">
+            <input type="checkbox" class="mail-checkbox mail-group-checkbox" [(ngModel)]="isCheckAll" #checkbox (click)="checkAll(checkbox.checked)">
             <div class="btn-group">
                 <a data-toggle="dropdown" href="#" class="btn mini all" aria-expanded="false">
                                          All
                                          <i class="fa fa-angle-down "></i>
                                      </a>
                 <ul class="dropdown-menu">
-                    <li><a href="#"> None</a></li>
-                    <li><a href="#"> Read</a></li>
-                    <li><a href="#"> Unread</a></li>
+                    <li><a href="#" (click)="unCheckAll()"> None</a></li>
+                    <li><a href="#" (click)="checkRead()"> Read</a></li>
+                    <li><a href="#" (click)="checkUnRead()"> Unread</a></li>
                 </ul>
             </div>
         </div>
@@ -21,32 +21,33 @@
                                      <i class="fa fa-angle-down "></i>
                                  </a>
             <ul class="dropdown-menu">
-                <li><a href="#"><i class="fa fa-pencil"></i> Mark as Read</a></li>
+                <li><a href="#" (click)="makeCheckedRead()"><i class="fa fa-pencil"></i> Mark as Read</a></li>
                 <li class="divider"></li>
-                <li><a href="#"><i class="fa fa-trash-o"></i> Delete</a></li>
+                <li><a href="#" (click)="deleteChecked()"><i class="fa fa-trash-o"></i> Delete</a></li>
+                <li class="divider"></li>
+                <li><a href="#" (click)="sort(sortRule.ByNewest)"><i class="fa fa-sort"> Sort by Newest</i></a></li>
+                <li><a href="#" (click)="sort(sortRule.ByRead)"><i class="fa fa-sort"> Sort by Read</i></a></li>
+                <li><a href="#" (click)="sort(sortRule.ByABC)"><i class="fa fa-sort"> Sort by ABC</i></a></li>
             </ul>
         </div>
-
+        
         <ul class="unstyled inbox-pagination">
-            <li><span>1-50 of {{count}}</span></li>
-            <li>
-                <a class="np-btn" href="#" (click)="giamGioiHan50()" [class.not-active]="gioihan === 50"><i class="fa fa-angle-left  pagination-left"></i></a>
-            </li>
-            <li>
-                <a class="np-btn" href="#" (click)="tangGioiHan50()" [class.not-active]="gioihan > count"><i class="fa fa-angle-right pagination-right"></i></a>
-            </li>
-        </ul>
+                            <li><span>{{count}}</span></li>
+                        </ul>
+
     </div>
-    <table class="table table-inbox table-hover">
-        <tbody>
-            <tr *ngFor="let article of tempArticles">
-                <td class="inbox-small-cells">
-                    <input type="checkbox" class="mail-checkbox">
-                </td>
-                <td class="inbox-small-cells"><i class="fa fa-star"></i></td>
-                <td class="view-message " colspan="3"><a href="{{article.link}}" target="_blank">{{article.title}}</a></td>
-                <td class="view-message  text-right">{{article.getDate()}}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="article-container">
+        <table class="table table-inbox table-hover">
+            <tbody>
+                <tr *ngFor="let article of articles" class="unread" [class.unread]="!article.isRead">
+                    <td class="small-cells">
+                        <input type="checkbox" class="mail-checkbox" [(ngModel)]="article.checked">
+                    </td>
+                    <td class="small-cells"><i class="fa fa-star"></i></td>
+                    <td colspan="3" class="large-cells"><a href="{{article.link}}" target="_blank" (click)="makeRead(article)">{{article.title}}</a></td>
+                    <td class="text-right">{{article.getDate()}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

@@ -1,9 +1,12 @@
 "use strict";
 var Article = (function () {
-    function Article(obj) {
+    function Article(obj, feedTitle) {
         this.title = obj.title;
         this.link = obj.link;
         this.publishDate = obj.publishDate;
+        this.isRead = obj.isRead;
+        this.checked = false;
+        this.feedTitle = feedTitle;
     }
     Article.prototype.getDate = function () {
         var date = this.publishDate.getDate();
@@ -16,7 +19,8 @@ var Article = (function () {
         var json = {
             "title": this.title,
             "link": this.link,
-            "publishDate": dateString
+            "publishDate": dateString,
+            "isRead": this.isRead
         };
         return json;
     };

@@ -9,10 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var http_1 = require('@angular/http');
 require('rxjs/add/operator/toPromise');
-var Feed_1 = require('../model/Feed');
-var Utility_1 = require('../model/Utility');
+var index_1 = require('../index');
+var HttpMethod_1 = require('../shared/HttpMethod');
 var manyRss = [];
 var RssService = (function () {
     function RssService(http) {
@@ -22,12 +21,12 @@ var RssService = (function () {
     }
     // get array of rss
     RssService.prototype.getManyRss = function () {
-        return this.get(this.rssUrl + '/' + this.sessionUser)
+        return this.http.get(this.rssUrl + '/' + this.sessionUser)
             .then(function (res) {
-            var obj = JSON.parse(res.text(), Utility_1.Utility.parseJsonToFeed);
+            var obj = JSON.parse(res.text(), index_1.Utility.parseJsonToFeed);
             var feeds = [];
             for (var i in obj) {
-                feeds.push(new Feed_1.Feed(obj[i]));
+                feeds.push(new index_1.Feed(obj[i]));
             }
             return feeds;
         })
@@ -39,12 +38,12 @@ var RssService = (function () {
     // add new link
     RssService.prototype.addLink = function (link) {
         var json = {
-            "link": link,
-            "user": this.sessionUser
+            'link': link,
+            'user': this.sessionUser
         };
-        return this.post(JSON.stringify(json), this.rssUrl).then(function (res) {
-            var obj = JSON.parse(res.text(), Utility_1.Utility.parseJsonToFeed);
-            var feed = new Feed_1.Feed(obj);
+        return this.http.post(JSON.stringify(json), this.rssUrl).then(function (res) {
+            var obj = JSON.parse(res.text(), index_1.Utility.parseJsonToFeed);
+            var feed = new index_1.Feed(obj);
             return feed;
         }).catch(function (err) {
             console.error('addLink: an error ' + err);
@@ -54,76 +53,32 @@ var RssService = (function () {
     // refesh the feed
     RssService.prototype.refeshFeed = function (feed) {
         var json = {
-            "user": this.sessionUser,
-            "feed": feed
+            'user': this.sessionUser,
+            'feed': feed
         };
-        return this.put(JSON.stringify(json), this.rssUrl)
-            .then(function () { return feed; })
+        return this.http.put(JSON.stringify(json), this.rssUrl)
+            .then(function (res) {
+            var obj = JSON.parse(res.text(), index_1.Utility.parseJsonToFeed);
+            var feed = new index_1.Feed(obj);
+            return feed;
+        })
             .catch(function (error) {
             console.error('refeshFeed: ' + error);
             return null;
         });
     };
-    // call get to server
-    RssService.prototype.get = function (url) {
-        return this.http.get(url)
-            .toPromise()
-            .then(function (res) {
-            console.log('get status code: ' + res.status);
-            // console.log('body response: ' + res.text());
-            return res;
-        })
-            .catch(this.handleError);
-    };
-    // call post to server
-    RssService.prototype.post = function (json, url) {
-        console.log('post chay voi gia tri: ' + JSON.stringify(json));
-        var headers = new http_1.Headers({
-            'Content-Type': 'application/json'
+    RssService.prototype.deleteFeed = function (feed) {
+        var url = this.rssUrl + '?link=' + feed.link + '&user=' + this.sessionUser;
+        return this.http.delete(url)
+            .then(function (res) { return feed; })
+            .catch(function (error) {
+            console.error('deleteFeed co error: ' + error);
+            return null;
         });
-        return this.http.post(url, json, headers)
-            .toPromise()
-            .then(function (res) {
-            console.log('post status code: ' + res.status);
-            // console.log('body response: ' + res.text());
-            return res;
-        })
-            .catch(this.handleError);
-    };
-    // call put to server
-    RssService.prototype.put = function (json, url) {
-        console.log('chay put voi gia tri: ' + json);
-        var headers = new http_1.Headers({
-            'Content-Type': 'application/json'
-        });
-        return this.http.put(url, json, headers)
-            .toPromise()
-            .then(function (res) {
-            console.log('put status code: ' + res.status);
-            // console.log('body response: ' + res.text());
-            return res;
-        })
-            .catch(this.handleError);
-    };
-    // handle error
-    RssService.prototype.handleError = function (error) {
-        console.error('An error occurred', error.json());
-        switch (error.status) {
-            case 406:
-                alert(error.json() || error);
-                break;
-            case 404:
-                alert(error.json() || error);
-                break;
-            default:
-                alert('có lỗi lạ: ' + (error.json() || error));
-                break;
-        }
-        return Promise.reject(error);
     };
     RssService = __decorate([
         core_1.Injectable(), 
-        __metadata('design:paramtypes', [http_1.Http])
+        __metadata('design:paramtypes', [HttpMethod_1.HttpMethod])
     ], RssService);
     return RssService;
 }());
