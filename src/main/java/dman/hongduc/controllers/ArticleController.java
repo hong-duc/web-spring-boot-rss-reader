@@ -33,26 +33,6 @@ public class ArticleController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * Rest action nhận HttpMethod Delete
-     *
-     * @param feedTitle
-     * @param articleTitle
-     * @param user
-     */
-    @RequestMapping(value = "/delete/{user}/", method = RequestMethod.DELETE)
-    public void restDeleteOneArticle(@RequestParam(value = "feedTitle") String feedTitle,
-            @RequestParam(value = "articleTitle") String articleTitle,
-            @PathVariable(value = "user") String user) {
-//        List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
-//        Optional<Feed> feed = userFeeds.stream().filter((f) -> f.getTitle().equalsIgnoreCase(feedTitle)).findFirst();
-//        boolean deleted = feed.get().getArticles().removeIf((a) -> a.getTitle().equalsIgnoreCase(articleTitle));
-//        LOG.info("deleteArticle is delete " + deleted);
-//        if (!deleted) {
-//            throw new ServerError();
-//        }
-//        FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
-    }
 
     @RequestMapping(value = "/deletes/{user}/", method = RequestMethod.PUT)
     public boolean deleteArticles(@PathVariable(value = "user") String user,
