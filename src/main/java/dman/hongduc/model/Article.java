@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Optional;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -15,26 +14,22 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 public class Article implements Serializable, Comparable<Article> {
 
-    private String title;
-    private String link;
+    private final String title;
+    private final String link;
     @JsonDeserialize(using = CustomDateDeserializer.class)
     @JsonSerialize(using = CustomDateSerializer.class)
-    private Optional<LocalDate> publishDate;
-    private boolean isRead;
-   
+    private final LocalDate publishDate;
+    private final boolean read;
 
     public Article() {
-        this.title = "";
-        this.link = "";
-        this.publishDate = Optional.empty();
-        this.isRead = false;
+        this("", "", LocalDate.now(), false);
     }
 
-    public Article(String title, String link, LocalDate publishDate, boolean isRead) {
+    public Article(String title, String link, LocalDate publishDate, boolean read) {
         this.title = title;
         this.link = link;
-        this.publishDate = Optional.of(publishDate);
-        this.isRead = isRead;
+        this.publishDate = publishDate;
+        this.read = read;
     }
 
     /**
@@ -45,13 +40,6 @@ public class Article implements Serializable, Comparable<Article> {
     }
 
     /**
-     * @param title the title to set
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
      * @return the link
      */
     public String getLink() {
@@ -59,23 +47,23 @@ public class Article implements Serializable, Comparable<Article> {
     }
 
     /**
-     * @param link the link to set
+     * @return the read
      */
-    public void setLink(String link) {
-        this.link = link;
+    public boolean isRead() {
+        return this.read;
     }
 
-    public boolean getIsRead() {
-        return this.isRead;
-    }
-
-    public void setIsRead(boolean isRead) {
-        this.isRead = isRead;
+    /**
+     * @return the publishDate
+     */
+    @XmlJavaTypeAdapter(FeedXmlWrapper.class)
+    public LocalDate getPublishDate() {
+        return this.publishDate;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Article){
+        if (obj instanceof Article) {
             Article a = (Article) obj;
             boolean eq1 = this.getTitle().equals(a.getTitle());
             boolean eq2 = this.getLink().equals(a.getLink());
@@ -88,35 +76,19 @@ public class Article implements Serializable, Comparable<Article> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.getTitle());
-        hash = 97 * hash + Objects.hashCode(this.getLink());
-        hash = 97 * hash + Objects.hashCode(this.getPublishDate());
+        hash += 97 * hash + Objects.hashCode(this.getTitle());
+        hash += 97 * hash + Objects.hashCode(this.getLink());
+        hash += 97 * hash + Objects.hashCode(this.getPublishDate());
         return hash;
     }
 
     @Override
     public int compareTo(Article o) {
         int number = this.getPublishDate().compareTo(o.getPublishDate());
-        if(number == 0){
+        if (number == 0) {
             return this.getTitle().compareTo(o.getTitle());
-        }else{
-            return number*-1;
+        } else {
+            return number * -1;
         }
     }
-
-    /**
-     * @return the publishDate
-     */
-    @XmlJavaTypeAdapter(FeedXmlWrapper.class)
-    public LocalDate getPublishDate() {
-        return publishDate.orElse(LocalDate.of(2000, 1, 1));
-    }
-
-    /**
-     * @param publishDate the publishDate to set
-     */
-    public void setPublishDate(LocalDate publishDate) {
-        this.publishDate = Optional.ofNullable(publishDate);
-    }
-
 }

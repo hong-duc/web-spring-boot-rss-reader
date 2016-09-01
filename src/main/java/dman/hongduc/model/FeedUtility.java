@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 public class FeedUtility {
 
     private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(FeedUtility.class);
+    public static final String DEFAULT_PATH_NAME = "/users/";
 
     /**
      * tạo ra danh sách Article từ rss url
@@ -111,15 +112,16 @@ public class FeedUtility {
     }
 
     /**
-     * Lưu danh sách Feed thành xml
+     * Lưu danh sách Feed vào file xml
      *
      * @param feeds danh sách Feed để lưu
      * @param user tên người dùng
+     * @param file_path_name tên đường dẫn tới nơi lưu file
      * @return true nếu lưu thành công, ngược lại false
      */
-    public static boolean saveFeeds(List<Feed> feeds, String user) {
+    public static boolean saveFeeds(List<Feed> feeds, String user, String file_path_name) {
         try {
-            File file = new File("users/" + user + "/rss.xml");
+            File file = new File(file_path_name + "/" + user + "/rss.xml");
             FeedXmlWrapper wrapper = new FeedXmlWrapper(feeds);
 
             JAXBContext context = JAXBContext.newInstance(FeedXmlWrapper.class);

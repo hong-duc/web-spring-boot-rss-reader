@@ -7,13 +7,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * lớp chính của chương trình
+ *
  * @author duc
  */
 @SpringBootApplication
 public class Application {
+
     public static void main(String[] args) throws IOException {
-        File file = new File("users/myuser");
-        file.createNewFile();
+        File dir = new File("users/myuser");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
         SpringApplication.run(Application.class, args);
     }
 }

@@ -48,7 +48,7 @@ public class RssController {
             Feed feed = FeedUtility.generateFeed(link);
             List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
             userFeeds.add(feed);
-            FeedUtility.saveFeeds(userFeeds, user);
+            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
             return feed;
         } catch (IllegalArgumentException | IOException ex) {
             LOG.error("themFeed: ", ex);
@@ -78,7 +78,7 @@ public class RssController {
             }
 
             feed.getArticles().addAll(FeedUtility.generateArticles(feed.getLink()));
-            FeedUtility.saveFeeds(userFeeds, user);
+            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
             LOG.info("feed updated");
             return feed;
         } catch (IOException | IllegalArgumentException ex) {
@@ -96,7 +96,7 @@ public class RssController {
             List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
 
             boolean deleted = userFeeds.removeIf(feed -> feed.getLink().equalsIgnoreCase(link));
-            FeedUtility.saveFeeds(userFeeds, user);
+            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
             LOG.info("deleted= " + deleted);
             return deleted;
         } catch (RuntimeException ex) {

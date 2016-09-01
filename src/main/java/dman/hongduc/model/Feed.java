@@ -13,12 +13,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
  */
 public class Feed implements Serializable {
 
-    private String title;
-    private String link;
-    private SortedSet<Article> articles;
+    private final String title;
+    private final String link;
+    private final SortedSet<Article> articles;
 
     public Feed() {
-
+        this("", "", new TreeSet<>());
     }
 
     /**
@@ -33,8 +33,8 @@ public class Feed implements Serializable {
         this.link = link;
         this.articles = articles;
     }
-    
-    public Feed(String title,String link){
+
+    public Feed(String title, String link) {
         this(title, link, new TreeSet<>());
     }
 
@@ -46,24 +46,10 @@ public class Feed implements Serializable {
     }
 
     /**
-     * @param title the title to set
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /**
      * @return the link
      */
     public String getLink() {
         return link;
-    }
-
-    /**
-     * @param link the link to set
-     */
-    public void setLink(String link) {
-        this.link = link;
     }
 
     /**
@@ -75,19 +61,11 @@ public class Feed implements Serializable {
         return articles;
     }
 
-    /**
-     *
-     * @param articles the articles to set
-     */
-    public void setArticles(SortedSet<Article> articles) {
-        this.articles = articles;
-    }
-
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 97 * hash + this.getLink().hashCode();
-        hash = 97 * hash + this.getTitle().hashCode();
+        hash += 97 * hash + this.getLink().hashCode();
+        hash += 97 * hash + this.getTitle().hashCode();
         return hash;
     }
 

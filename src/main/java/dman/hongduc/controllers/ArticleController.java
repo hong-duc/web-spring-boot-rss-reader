@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import dman.hongduc.errors.ResponseError.ServerError;
 import dman.hongduc.model.Article;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,8 +31,14 @@ public class ArticleController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * Rest action nhận HttpMethod Delete
+     * @param feedTitle
+     * @param articleTitle
+     * @param user
+     */
     @RequestMapping(value = "/delete/{user}/", method = RequestMethod.DELETE)
-    public void deleteArticle(@RequestParam(value = "feedTitle") String feedTitle,
+    public void restDeleteOneArticle(@RequestParam(value = "feedTitle") String feedTitle,
             @RequestParam(value = "articleTitle") String articleTitle,
             @PathVariable(value = "user") String user) {
         List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
@@ -40,7 +48,7 @@ public class ArticleController {
         if (!deleted) {
             throw new ServerError();
         }
-        FeedUtility.saveFeeds(userFeeds, user);
+        FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
     }
 
     @RequestMapping(value = "/deletes/{user}/", method = RequestMethod.PUT)
@@ -57,7 +65,7 @@ public class ArticleController {
             Feed userFeed = FeedUtility.findFeedByTitle(userFeeds, feedTitle);
             List<Article> toDeleteArticles = getArticleFromJsonArray(jsonArray, userFeed.getArticles());
             boolean deleted = userFeed.getArticles().removeAll(toDeleteArticles);
-            FeedUtility.saveFeeds(userFeeds, user);
+            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
             return deleted;
         }
     }
@@ -71,8 +79,8 @@ public class ArticleController {
         List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
         Feed feed = FeedUtility.findFeedByTitle(userFeeds, feedTitle);
         Article article = FeedUtility.findArticleByTitle(feed, articleTitle);
-        article.setIsRead(isRead);
-        FeedUtility.saveFeeds(userFeeds, user);
+        //article.setIsRead(isRead);
+        FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
         return article;
     }
 
@@ -85,8 +93,8 @@ public class ArticleController {
         List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
         Feed userFeed = FeedUtility.findFeedByTitle(userFeeds, feedTitle);
         SortedSet<Article> articles = updateIsReadOfArticlesByTitle(userFeed.getArticles(), jsonArray);
-        userFeed.setArticles(articles);
-        FeedUtility.saveFeeds(userFeeds, user);
+        //userFeed.setArticles(articles);
+        FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
     }
 
     private List<Article> getArticleFromJsonArray(JSONArray array, SortedSet<Article> userArticles) {
@@ -105,7 +113,7 @@ public class ArticleController {
     private SortedSet<Article> updateIsReadOfArticlesByTitle(SortedSet<Article> articles, JSONArray jsonArray) {
         if (articles.size() == jsonArray.length()) {
             articles.forEach(a -> {
-                a.setIsRead(true);
+                //a.setIsRead(true);
             });
         } else {
             for (Article a : articles) {
@@ -114,7 +122,7 @@ public class ArticleController {
                 } else {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         if (a.getTitle().equalsIgnoreCase(jsonArray.getString(i))) {
-                            a.setIsRead(true);
+                            //a.setIsRead(true);
                             jsonArray.remove(i);
                         }
                     }
@@ -122,5 +130,26 @@ public class ArticleController {
             }
         }
         return articles;
+    }
+    
+    /**
+     * Xóa một hoặc nhiều article khỏi danh sách
+     * ,nếu article đó có title nằm trong danh sách
+     * titleToDelete
+     * 
+     * @param <R> kiểu danh sách muốn trả về
+     * @param setArticles một danh sách article muốn xóa khỏi
+     * @param titleToDelete danh sách các title để so sánh
+     * @return danh sách title sau khi đã xóa
+     */
+    public<R extends Collection> R deleteArticlesFromSet(Collection<Article> setArticles,String[] titleToDelete){
+        Collection<Article> result = setArticles.stream().filter((Article a) -> {
+            for(String t : titleToDelete){
+                if(a.getTitle().equals(t))
+                    return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+        return (R) result;
     }
 }
