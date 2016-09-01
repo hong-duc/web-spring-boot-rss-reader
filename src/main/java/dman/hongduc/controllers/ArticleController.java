@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import dman.hongduc.errors.ResponseError.ServerError;
 import dman.hongduc.model.Article;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,39 +83,24 @@ public class ArticleController {
 //        FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
     }
 
-    private List<Article> getArticleFromJsonArray(JSONArray array, SortedSet<Article> userArticles) {
-        List<Article> articles = new ArrayList<>();
-        for (int i = 0; i < array.length(); i++) {
-            for (Article a : userArticles) {
-                if (a.getTitle().equalsIgnoreCase(array.getString(i))) {
-                    articles.add(a);
-                    break;
-                }
-            }
-        }
-        return articles;
-    }
 
-    private SortedSet<Article> updateIsReadOfArticlesByTitle(SortedSet<Article> articles, JSONArray jsonArray) {
-        if (articles.size() == jsonArray.length()) {
-            articles.forEach(a -> {
-                //a.setIsRead(true);
-            });
-        } else {
-            for (Article a : articles) {
-                if (jsonArray.length() == 0) {
-                    break;
-                } else {
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        if (a.getTitle().equalsIgnoreCase(jsonArray.getString(i))) {
-                            //a.setIsRead(true);
-                            jsonArray.remove(i);
-                        }
-                    }
+    /**
+     * update những article nào có title trong danh sách titleToUpdate
+     * 
+     * @param articles danh sách articles muốn update
+     * @param titleToUpdate danh sách title để so sanh với article
+     * @return một SortedSet<Article> đã update
+     */
+    private SortedSet<Article> updateReadOfArticlesByTitle(Collection<Article> articles, String... titleToUpdate) {
+        SortedSet<Article> result = articles.stream().map((Article a) -> {
+            for(String title : titleToUpdate){
+                if(a.getTitle().equals(title)){
+                    return new Article(a.getTitle(), a.getLink(), a.getPublishDate(), true);
                 }
             }
-        }
-        return articles;
+            return a;
+        }).collect(Collectors.toCollection(TreeSet::new));
+        return result;
     }
 
     /**
