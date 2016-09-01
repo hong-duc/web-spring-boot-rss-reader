@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -14,11 +15,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 public class Article implements Serializable, Comparable<Article> {
 
+    @XmlElement
     private final String title;
+    @XmlElement
     private final String link;
     @JsonDeserialize(using = CustomDateDeserializer.class)
     @JsonSerialize(using = CustomDateSerializer.class)
+    @XmlJavaTypeAdapter(FeedXmlWrapper.class)
     private final LocalDate publishDate;
+    @XmlElement
     private final boolean read;
 
     public Article() {
@@ -56,7 +61,6 @@ public class Article implements Serializable, Comparable<Article> {
     /**
      * @return the publishDate
      */
-    @XmlJavaTypeAdapter(FeedXmlWrapper.class)
     public LocalDate getPublishDate() {
         return this.publishDate;
     }
@@ -91,4 +95,24 @@ public class Article implements Serializable, Comparable<Article> {
             return number * -1;
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        return builder.append("{")
+                .append("title:")
+                .append(this.title)
+                .append(",")
+                .append("link:")
+                .append(this.link)
+                .append(",")
+                .append("read:")
+                .append(this.read)
+                .append(",")
+                .append("publishDate:")
+                .append(this.publishDate.toString())
+                .append("}")
+                .toString();
+    }
+
 }

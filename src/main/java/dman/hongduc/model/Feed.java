@@ -13,8 +13,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
  */
 public class Feed implements Serializable {
 
+    @XmlElement
     private final String title;
+    @XmlElement
     private final String link;
+    @XmlElement(name = "Article")
+    @XmlElementWrapper(name = "Articles")
     private final SortedSet<Article> articles;
 
     public Feed() {
@@ -55,8 +59,6 @@ public class Feed implements Serializable {
     /**
      * @return the articles
      */
-    @XmlElement(name = "Article")
-    @XmlElementWrapper(name = "Articles")
     public SortedSet<Article> getArticles() {
         return articles;
     }

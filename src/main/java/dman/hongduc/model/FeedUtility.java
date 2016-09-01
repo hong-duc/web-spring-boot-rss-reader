@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import static java.util.stream.Collectors.toList;
 import javax.xml.bind.JAXBContext;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class FeedUtility {
 
     private final static org.slf4j.Logger LOG = LoggerFactory.getLogger(FeedUtility.class);
-    public static final String DEFAULT_PATH_NAME = "/users/";
+    public static final String DEFAULT_PATH_NAME = "users/";
 
     /**
      * tạo ra danh sách Article từ rss url
@@ -87,29 +88,21 @@ public class FeedUtility {
     /**
      * lấy Rss của user này
      *
-     * @param user String tên user
+     * @param user tên thư mục của user đó
+     * @param file_path_name
      * @return danh sách Rss, null nếu user không tồn tại
      */
-    public static List<Feed> getUserFeeds(String user) {
-        if (isUserExists(user)) {
+    public static Optional<List<Feed>> getUserFeeds(String user, String file_path_name) {
+        File file = new File(file_path_name + user);
+        if (file.exists()) {
             LOG.info("getUserRSS: user co ton tai");
-            return loadFeeds(user);
+            return loadFeeds(user, file_path_name);
         } else {
             LOG.error("getUserRSS: user khong ton tai");
-            return null;
+            return Optional.empty();
         }
     }
 
-    /**
-     * kiểm tra user có tồn tại trong thư mục users không
-     *
-     * @param user tên user để kiểm tra
-     * @return true nếu tồn tại,false nếu không tồn tại
-     */
-    private static boolean isUserExists(String user) {
-        File file = new File("users/" + user);
-        return file.exists();
-    }
 
     /**
      * Lưu danh sách Feed vào file xml
@@ -121,7 +114,7 @@ public class FeedUtility {
      */
     public static boolean saveFeeds(List<Feed> feeds, String user, String file_path_name) {
         try {
-            File file = new File(file_path_name + "/" + user + "/rss.xml");
+            File file = new File(file_path_name + user + "/rss.xml");
             FeedXmlWrapper wrapper = new FeedXmlWrapper(feeds);
 
             JAXBContext context = JAXBContext.newInstance(FeedXmlWrapper.class);
@@ -141,17 +134,17 @@ public class FeedUtility {
      * @param user tên người dùng
      * @return danh sách Feed nếu có, nếu không có trả về danh sách rỗng
      */
-    private static List<Feed> loadFeeds(String user) {
+    private static Optional<List<Feed>> loadFeeds(String user,String file_path_name) {
         try {
-            File file = new File("users/" + user + "/rss.xml");
+            File file = new File(file_path_name + user + "/rss.xml");
 
             JAXBContext context = JAXBContext.newInstance(FeedXmlWrapper.class);
             Unmarshaller u = context.createUnmarshaller();
             FeedXmlWrapper wrapper = (FeedXmlWrapper) u.unmarshal(file);
-            return wrapper.getFeeds();
+            return Optional.of(wrapper.getFeeds());
         } catch (JAXBException ex) {
             LOG.error("loadFeeds error: ", ex);
-            return new ArrayList<>();
+            return Optional.empty();
         }
     }
 

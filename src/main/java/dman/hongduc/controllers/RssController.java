@@ -31,78 +31,81 @@ public class RssController {
 
     @RequestMapping(value = "/{user}", method = RequestMethod.GET)
     public List<Feed> getRss(@PathVariable(value = "user") String user) {
-        List<Feed> feeds = FeedUtility.getUserFeeds(user);
-        if (feeds == null) {
-            throw new ResponseError.UserNotExists();
-        } else {
-            return feeds;
-        }
+//        List<Feed> feeds = FeedUtility.getUserFeeds(user);
+//        if (feeds == null) {
+//            throw new ResponseError.UserNotExists();
+//        } else {
+//            return feeds;
+//        }
+        return null;
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Feed themFeed(@RequestBody(required = true) String resource) {
-        try {
-            JSONObject obj = new JSONObject(resource);
-            String link = obj.getString("link");
-            String user = obj.getString("user");
-            Feed feed = FeedUtility.generateFeed(link);
-            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
-            userFeeds.add(feed);
-            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
-            return feed;
-        } catch (IllegalArgumentException | IOException ex) {
-            LOG.error("themFeed: ", ex);
-            throw new NotGoodUrl();
-        } catch (FeedException ex) {
-            LOG.error("themFeed: ", ex);
-            throw new InvalidUrl();
-        }
+//        try {
+//            JSONObject obj = new JSONObject(resource);
+//            String link = obj.getString("link");
+//            String user = obj.getString("user");
+//            Feed feed = FeedUtility.generateFeed(link);
+//            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+//            userFeeds.add(feed);
+//            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
+//            return feed;
+//        } catch (IllegalArgumentException | IOException ex) {
+//            LOG.error("themFeed: ", ex);
+//            throw new NotGoodUrl();
+//        } catch (FeedException ex) {
+//            LOG.error("themFeed: ", ex);
+//            throw new InvalidUrl();
+//        }
+        return null;
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public Feed updateFeed(@RequestBody String resource) {
-        try {
-            JSONObject jsObj = new JSONObject(resource);
-            Object jsFeed = jsObj.get("feed");
-            String user = jsObj.getString("user");
-
-            ObjectMapper mapper = new ObjectMapper();
-            Feed feed = mapper.readValue(jsFeed.toString(), Feed.class);
-            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
-            for (Feed f : userFeeds) {
-                if (f.equals(feed)) {
-                    feed = f;
-                    LOG.info("updateFeed: equal");
-                    break;
-                }
-            }
-
-            feed.getArticles().addAll(FeedUtility.generateArticles(feed.getLink()));
-            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
-            LOG.info("feed updated");
-            return feed;
-        } catch (IOException | IllegalArgumentException ex) {
-            LOG.error("updateFeed: ", ex);
-            throw new NotGoodUrl();
-        } catch (FeedException ex) {
-            LOG.error("updateFeed: ", ex);
-            throw new InvalidUrl();
-        }
+//        try {
+//            JSONObject jsObj = new JSONObject(resource);
+//            Object jsFeed = jsObj.get("feed");
+//            String user = jsObj.getString("user");
+//
+//            ObjectMapper mapper = new ObjectMapper();
+//            Feed feed = mapper.readValue(jsFeed.toString(), Feed.class);
+//            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+//            for (Feed f : userFeeds) {
+//                if (f.equals(feed)) {
+//                    feed = f;
+//                    LOG.info("updateFeed: equal");
+//                    break;
+//                }
+//            }
+//
+//            feed.getArticles().addAll(FeedUtility.generateArticles(feed.getLink()));
+//            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
+//            LOG.info("feed updated");
+//            return feed;
+//        } catch (IOException | IllegalArgumentException ex) {
+//            LOG.error("updateFeed: ", ex);
+//            throw new NotGoodUrl();
+//        } catch (FeedException ex) {
+//            LOG.error("updateFeed: ", ex);
+//            throw new InvalidUrl();
+//        }
+        return null;
     }
 
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     public boolean deleteFeed(@RequestParam(value = "link") String link, @RequestParam(value = "user") String user) {
-        try {
-            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
-
-            boolean deleted = userFeeds.removeIf(feed -> feed.getLink().equalsIgnoreCase(link));
-            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
-            LOG.info("deleted= " + deleted);
-            return deleted;
-        } catch (RuntimeException ex) {
-            LOG.error("deleteFeed error: ", ex);
-            throw new ResponseError.ServerError();
-        }
-
+//        try {
+//            List<Feed> userFeeds = FeedUtility.getUserFeeds(user);
+//
+//            boolean deleted = userFeeds.removeIf(feed -> feed.getLink().equalsIgnoreCase(link));
+//            FeedUtility.saveFeeds(userFeeds, user,FeedUtility.DEFAULT_PATH_NAME);
+//            LOG.info("deleted= " + deleted);
+//            return deleted;
+//        } catch (RuntimeException ex) {
+//            LOG.error("deleteFeed error: ", ex);
+//            throw new ResponseError.ServerError();
+//        }
+        return false;
     }
 }
